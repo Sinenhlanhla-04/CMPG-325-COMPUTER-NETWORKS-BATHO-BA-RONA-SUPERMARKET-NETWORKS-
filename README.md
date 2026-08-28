@@ -211,4 +211,15 @@ The project will continue beyond this first milestone. Future work may include:
 **Current Stage: First Milestone**
 
 This repository represents the **current stage of the project and is not the final completed network implementation**. The design and documentation will be updated as additional milestones and requirements are completed.
+## 🎓 Academic Integrity 
+
+This project was developed as part of the **CMPG 325 — Computer Networks** academic coursework.
+
+Artificial Intelligence (AI) tools were used during the development of this project as a **learning and support resource**, including assistance with understanding networking concepts, clarifying instructions, and improving the organisation and documentation of the project.
+
+The final work reflects my **own understanding, analysis, decision-making, and implementation** of the network design. I did not copy another student's work or submit someone else's project as my own. 
+
+All project decisions, configurations, designs, and documentation were reviewed and understood by me. Any external sources or assistance used during the development of the project should be acknowledged in accordance with the academic integrity requirements of **North-West University**.
+
+This repository is intended for **academic and educational purposes** and should not be copied, reproduced, or submitted as another student's work.
 
