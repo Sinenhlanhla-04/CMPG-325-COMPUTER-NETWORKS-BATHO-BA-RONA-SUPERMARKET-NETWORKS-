@@ -1,225 +1,80 @@
 # Batho Ba Rona Supermarket — Network Design
 
 ## 📌 Project Overview
+Individual semester project for **CMPG 325 — Computer Networks** (Project ID: CMPG325-2026-015, Client ID: CLI-015).
 
-This repository contains the **First Milestone** of the Batho Ba Rona Supermarket network design project for **CMPG 325 — Computer Networks**.
+The project designs and simulates, in Cisco Packet Tracer, the network for Batho Ba Rona Supermarket, a small retail supermarket in Mahikeng. The network supports the Point-of-Sale (POS) systems, administration users, staff Wi-Fi and the server. The client has only one part-time IT support person, so the design is kept simple and easy to maintain.
 
-The project focuses on designing a network infrastructure for Batho Ba Rona Supermarket, a small retail supermarket located in Mahikeng. The network is intended to support the supermarket's Point-of-Sale (POS) systems, administrative users, staff Wi-Fi, and server/inventory systems.
+**Status:** Implementation complete. The video demonstration is the final item.
 
-This milestone documents the network requirements, proposed physical and logical topology, IP addressing plan, VLAN segmentation, growth planning, and the initial default routing design.
+## 🌐 Network Design
+The assigned block 192.168.17.0/24 is divided with VLSM:
 
-> **⚠️ Project Status: First Milestone — Work in Progress**
+| VLAN | Department | Network | Usable Hosts | Gateway |
+|---|---|---|---|---|
+| 20 | Administration | 192.168.17.0/27 | 30 | 192.168.17.1 |
+| 30 | Wi-Fi/Staff | 192.168.17.32/27 | 30 | 192.168.17.33 |
+| 10 | POS | 192.168.17.64/28 | 14 | 192.168.17.65 |
+| 40 | Server | 192.168.17.80/29 | 6 | 192.168.17.81 |
+| — | WAN to ISP | 192.168.17.88/30 | 2 | .89 (ISP), .90 (edge) |
 
-The network project is **not yet completed**. Additional configurations, testing, verification, documentation, and requirements may be completed in subsequent milestones.
+Devices: ISP router, edge router (router-on-a-stick), core switch, three access switches, an access point, and PCs, a printer, a server and a laptop.
 
----
+## 🔀 Assigned Challenge — Default Routing (edge/ISP path)
+A static default route on BBR-EDGE-RTR sends all traffic that is not for an internal VLAN to the ISP router:
 
-## 🏪 Client Background
+`ip route 0.0.0.0 0.0.0.0 192.168.17.89`
 
-Batho Ba Rona Supermarket is a small retail supermarket located in **Mahikeng**, serving the local community with grocery and household products.
+**Why it is appropriate:** the supermarket has a single connection to the ISP, so one next hop is enough. A static route is simple and suits the one part-time IT person.
 
-The supermarket depends on:
+**How it was verified:**
+- `show ip route` shows `S* 0.0.0.0/0 via 192.168.17.89`.
+- BBR-EDGE-RTR pings the ISP router with 100% success, and the traceroute shows a single hop.
+- POS-PC1 (VLAN 10), ADMIN-PC1 (VLAN 20) and STAFF-LAPTOP (VLAN 30) all reach 192.168.17.89 through their gateways.
+- ISP-RTR has a return route to 192.168.17.0/24 via 192.168.17.90.
 
-* Point-of-Sale (POS) systems
-* Administrative systems
-* Staff wireless connectivity
-* Inventory and stock management systems
+## 📈 Change Request CR5 — 25% User Growth
+The subnets were sized so a 25% increase fits without renumbering:
 
-The network must therefore be reliable and easy to maintain because the business has only **one part-time IT support person** managing its technology needs.
+| Department | Current | After +25% | Subnet capacity |
+|---|---|---|---|
+| POS | 10 | 13 | 14 (/28) |
+| Administration | 15 | 19 | 30 (/27) |
+| Wi-Fi/Staff | 20 | 25 | 30 (/27) |
+| Server | 3 | 4 | 6 (/29) |
 
----
+## 🛠️ Troubleshooting Performed
+- The SW-POS uplink to BBR-CORE-SW was disconnected and was reconnected (SW-POS Fa0/1 to BBR-CORE-SW Fa0/2).
+- The ISP router needed its interface address and a return route.
+- BBR-CORE-SW Fa0/4 was an access port in VLAN 1. It was changed to a trunk carrying VLAN 30 so the Wi-Fi VLAN could reach its gateway.
 
-## 🎯 First Milestone Objectives
-
-The main objectives covered in this milestone are:
-
-* Analyse the client's network requirements.
-* Use the assigned `192.168.17.0/24` address block.
-* Develop a physical network topology.
-* Develop a logical network topology.
-* Divide the network into appropriate VLANs.
-* Create a VLSM-based IP addressing plan.
-* Plan for a 25% increase in users without requiring renumbering.
-* Develop an initial default routing design.
-
----
-
-## 🌐 Network Segmentation
-
-The proposed network is divided into four main VLANs:
-
-|   VLAN | Department     | Purpose                          |
-| -----: | -------------- | -------------------------------- |
-| **10** | POS            | Point-of-Sale systems            |
-| **20** | Administration | Administrative users and systems |
-| **30** | Wi-Fi/Staff    | Staff wireless devices           |
-| **40** | Server         | Inventory and stock systems      |
-
-Logical segmentation was selected to separate the different areas of the supermarket and make the network easier to manage.
-
----
-
-## 🖥️ Physical Topology
-
-The proposed physical topology includes:
-
-* ISP router
-* Edge router
-* Core switch
-* Three access switches
-* POS devices
-* Administration devices
-* Wi-Fi/Staff devices
-* Server systems
-
-The physical topology represents how the network devices are connected and how the different departments will access the network.
-
-
-The logical topology represents the VLAN assignments, subnet allocations, gateway addresses, and WAN connection.
-
-The `192.168.17.0/24` address block is divided between the different network segments using VLSM.
-
-#IP ADDRESS PLANNING
-1
-
-VLSM is used to divide the address block according to the estimated requirements of each department. The subnets are also sized to accommodate the required **25% user growth** without requiring network renumbering.
-
-|                 VLAN | Network            | Subnet Mask       | Usable Hosts | Gateway         |
-| -------------------: | ------------------ | ----------------- | -----------: | --------------- |
-|       **20 – Admin** | `192.168.17.0/27`  | `255.255.255.224` |           30 | `192.168.17.1`  |
-| **30 – Wi-Fi/Staff** | `192.168.17.32/27` | `255.255.255.224` |           30 | `192.168.17.33` |
-|         **10 – POS** | `192.168.17.64/28` | `255.255.255.240` |           14 | `192.168.17.65` |
-|      **40 – Server** | `192.168.17.80/29` | `255.255.255.248` |            6 | `192.168.17.81` |
-|              **WAN** | `192.168.17.88/30` | `255.255.255.252` |            2 | —               |
-
----
-
-## 📈 Growth Planning
-
-The design considers **CR5**, which requires the network to accommodate a **25% increase in users** without requiring renumbering.
-
-| Department     | Current Devices | 25% Growth | Planned Capacity |
-| -------------- | --------------: | ---------: | ---------------: |
-| POS            |              10 |       12.5 |          13 → 16 |
-| Administration |              15 |      18.75 |          19 → 30 |
-| Wi-Fi/Staff    |              20 |         25 |               30 |
-| Server         |               3 |       3.75 |            4 → 6 |
-
-The intention is to allocate sufficient address space during the initial design so that additional devices can be added later without changing the existing addressing structure.
-
----
-
-## 🔀 Initial Default Routing Design
-
-The proposed design uses a **static default route** on the edge router.
-
-
-The edge router will use this route to forward traffic that is not destined for a local network toward the ISP router.
-
-A static default route was selected because the network needs to remain relatively simple and manageable for the available IT support resources.
-
-> **Note:** Routing configuration and verification form part of the ongoing project work and are not presented as fully completed in this milestone.
-
----
+## 📂 Repository Contents
+- `Batho Ba Rona Supermarket.docx` — Milestone 1 design documentation
+- Milestone 2 documentation (Word document)
+- `BathoBarona_CLI-015_Milestone2.pkt` — final Packet Tracer file
+- `configs/` — running configurations of BBR-EDGE-RTR and ISP-RTR
+- `screenshots/milestone2/` — testing evidence
+- `reflection.md` — project reflection
+- Earlier Packet Tracer files from Milestone 1
 
 ## 🛠️ Tools and Technologies
-
-The project currently uses:
-
-* **Cisco Packet Tracer**
-* IPv4 addressing
-* VLSM
-* VLANs
-* Ethernet switching
-* Router configuration
-* Static/default routing
-
----
-
-## 📂 Repository Structure
-
-The repository may contain the following files as the project develops:
-
-Batho-Ba-Rona-Supermarket/
-│
-├── README.md
-│
-├── packet-tracer/
-│   └── Batho-Ba-Rona-Supermarket.pkt
-│
-├── documentation/
-│   └── Batho Ba Rona Supermarket.docx
-│
-├── images/
-│   ├── physical-topology.png
-│   └── logical-topology.png
-│
-└── screenshots/
-    └── ...
-```
-
-Additional files and screenshots will be added as the project progresses through future milestones.
-
----
-
-## 📊 Current Milestone Status
-
-| Component              | Status                      |
-| ---------------------- | --------------------------- |
-| Client requirements    | ✅ Completed for Milestone 1 |
-| Client analysis        | ✅ Completed for Milestone 1 |
-| Physical topology      | ✅ Designed                  |
-| Logical topology       | ✅ Designed                  |
-| VLAN planning          | ✅ Planned                   |
-| IP addressing plan     | ✅ Designed                  |
-| VLSM                   | ✅ Planned                   |
-| 25% growth planning    | ✅ Planned                   |
-| Default routing design | 🔄 Initial design           |
-| Full configuration     | 🔄 In progress              |
-| Network verification   | 🔄 To be completed          |
-| Final documentation    | 🔄 To be completed          |
-
----
-
-## 🚧 Future Work
-
-The project will continue beyond this first milestone. Future work may include:
-
-* Completing device configurations.
-* Configuring VLANs and switch ports.
-* Configuring routing.
-* Verifying connectivity between network segments.
-* Testing the default route.
-* Performing `ping` and `traceroute` tests.
-* Adding configuration and verification screenshots.
-* Updating the documentation as new milestones are completed.
-
----
+Cisco Packet Tracer, IPv4, VLSM, VLANs, 802.1Q trunking, router-on-a-stick, static routing.
 
 ## 👤 Project Information
-
 **Client:** Batho Ba Rona Supermarket
 **Module:** CMPG 325 — Computer Networks
 **Project ID:** CMPG325-2026-015
 **Client ID:** CLI-015
 **Location:** Mahikeng
 
----
-
-## 📌 Project Status
-
-**Current Stage: First Milestone**
-
-This repository represents the **current stage of the project and is not the final completed network implementation**. The design and documentation will be updated as additional milestones and requirements are completed.
-## 🎓 Academic Integrity 
+## 🎓 Academic Integrity
 
 This project was developed as part of the **CMPG 325 — Computer Networks** academic coursework.
 
 Artificial Intelligence (AI) tools were used during the development of this project as a **learning and support resource**, including assistance with understanding networking concepts, clarifying instructions, and improving the organisation and documentation of the project.
 
-The final work reflects my **own understanding, analysis, decision-making, and implementation** of the network design. I did not copy another student's work or submit someone else's project as my own. 
+The final work reflects my **own understanding, analysis, decision-making, and implementation** of the network design. I did not copy another student's work or submit someone else's project as my own.
 
 All project decisions, configurations, designs, and documentation were reviewed and understood by me. Any external sources or assistance used during the development of the project should be acknowledged in accordance with the academic integrity requirements of **North-West University**.
 
 This repository is intended for **academic and educational purposes** and should not be copied, reproduced, or submitted as another student's work.
-
