@@ -3,9 +3,10 @@
 ## 📌 Project Overview
 Individual semester project for **CMPG 325 — Computer Networks** (Project ID: CMPG325-2026-015, Client ID: CLI-015).
 
-The project designs and simulates, in Cisco Packet Tracer, the network for Batho Ba Rona Supermarket, a small retail supermarket in Mahikeng. The network supports the Point-of-Sale (POS) systems, administration users, staff Wi-Fi and the server. The client has only one part-time IT support person, so the design is kept simple and easy to maintain.
+This project designs and simulates, in Cisco Packet Tracer, the network for Batho Ba Rona Supermarket, a small retail supermarket in Mahikeng. The network supports the Point-of-Sale (POS) systems, administration users, staff Wi-Fi and the server. The client has only one part-time IT support person, so the design is kept simple and easy to maintain.
 
-**Status:** Implementation complete. The video demonstration is the final item.
+**Status:** Implementation, testing and documentation are complete.
+**Video demonstration:** 
 
 ## 🌐 Network Design
 The assigned block 192.168.17.0/24 is divided with VLSM:
@@ -18,7 +19,7 @@ The assigned block 192.168.17.0/24 is divided with VLSM:
 | 40 | Server | 192.168.17.80/29 | 6 | 192.168.17.81 |
 | — | WAN to ISP | 192.168.17.88/30 | 2 | .89 (ISP), .90 (edge) |
 
-Devices: ISP router, edge router (router-on-a-stick), core switch, three access switches, an access point, and PCs, a printer, a server and a laptop.
+**Devices:** ISP router, edge router (router-on-a-stick), core switch, three access switches, an access point, PCs, a printer, a server and a laptop.
 
 ## 🔀 Assigned Challenge — Default Routing (edge/ISP path)
 A static default route on BBR-EDGE-RTR sends all traffic that is not for an internal VLAN to the ISP router:
@@ -29,7 +30,7 @@ A static default route on BBR-EDGE-RTR sends all traffic that is not for an inte
 
 **How it was verified:**
 - `show ip route` shows `S* 0.0.0.0/0 via 192.168.17.89`.
-- BBR-EDGE-RTR pings the ISP router with 100% success, and the traceroute shows a single hop.
+- BBR-EDGE-RTR pings the ISP router, and the traceroute shows a single hop.
 - POS-PC1 (VLAN 10), ADMIN-PC1 (VLAN 20) and STAFF-LAPTOP (VLAN 30) all reach 192.168.17.89 through their gateways.
 - ISP-RTR has a return route to 192.168.17.0/24 via 192.168.17.90.
 
@@ -38,26 +39,30 @@ The subnets were sized so a 25% increase fits without renumbering:
 
 | Department | Current | After +25% | Subnet capacity |
 |---|---|---|---|
-| POS | 10 | 13 | 14 (/28) |
-| Administration | 15 | 19 | 30 (/27) |
-| Wi-Fi/Staff | 20 | 25 | 30 (/27) |
-| Server | 3 | 4 | 6 (/29) |
+| POS | 10 | 13 | 14 usable (/28, 16 addresses) |
+| Administration | 15 | 19 | 30 usable (/27) |
+| Wi-Fi/Staff | 20 | 25 | 30 usable (/27) |
+| Server | 3 | 4 | 6 usable (/29) |
+
+New devices join the existing VLANs, so no re-addressing is needed.
 
 ## 🛠️ Troubleshooting Performed
 - The SW-POS uplink to BBR-CORE-SW was disconnected and was reconnected (SW-POS Fa0/1 to BBR-CORE-SW Fa0/2).
-- The ISP router needed its interface address and a return route.
+- The ISP router needed its interface address and a return route to the supermarket network.
+- The first ping after a link comes up can time out while ARP resolves; repeating it succeeds.
 - BBR-CORE-SW Fa0/4 was an access port in VLAN 1. It was changed to a trunk carrying VLAN 30 so the Wi-Fi VLAN could reach its gateway.
+
+## 💭 Reflection
+This project taught me how to plan a network with VLANs and VLSM, configure a static default route, and test it with ping and traceroute. The hardest part was troubleshooting, where I learned to check one step at a time, starting close to the device and moving outward. If I did it again, I would set up DHCP for the Wi-Fi and save the device configurations after every change.
 
 ## 📂 Repository Contents
 - `Batho Ba Rona Supermarket.docx` — Milestone 1 design documentation
 - Milestone 2 documentation (Word document)
 - `BathoBarona_CLI-015_Milestone2.pkt` — final Packet Tracer file
-- `configs/` — running configurations of BBR-EDGE-RTR and ISP-RTR
-- `screenshots/milestone2/` — testing evidence
-- `reflection.md` — project reflection
+- `BathoBaRona_Presentation.pptx` — presentation slides used in the video
 - Earlier Packet Tracer files from Milestone 1
 
-## 🛠️ Tools and Technologies
+## 🧰 Tools and Technologies
 Cisco Packet Tracer, IPv4, VLSM, VLANs, 802.1Q trunking, router-on-a-stick, static routing.
 
 ## 👤 Project Information
